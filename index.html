@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>B&B da Me — Prenota il tuo soggiorno</title>
+  <style>
+    :root {
+      --primary: #1a4b8c;
+      --primary-dark: #0f3260;
+      --secondary: #4a90d9;
+      --accent: #f5c518;
+      --accent-dark: #d4a800;
+      --accent-soft: #fff8dc;
+      --bg: #f0f4fa;
+      --card-bg: #ffffff;
+      --text: #1c2b3a;
+      --muted: #5a6b7c;
+      --success: #1a7a4c;
+      --success-bg: #e8f7ef;
+      --shadow-sm: 0 4px 12px rgba(26, 75, 140, 0.08);
+      --shadow-md: 0 10px 30px rgba(26, 75, 140, 0.12);
+      --shadow-lg: 0 20px 50px rgba(26, 75, 140, 0.18);
+      --radius: 20px;
+      --radius-sm: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html { -webkit-text-size-adjust: 100%; }
+
+    body {
+      background:
+        radial-gradient(circle at 10% 0%, #dce9f7 0%, transparent 45%),
+        radial-gradient(circle at 90% 100%, #fff5cc 0%, transparent 45%),
+        var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      line-height: 1.5;
+    }
+
+    .container {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 540px;
+      padding: 28px 24px 24px;
+      overflow: hidden;
+      position: relative;
+      animation: containerIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes containerIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .container::before {
+      content: "";
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 140px; height: 140px;
+      background: linear-gradient(135deg, var(--accent), var(--secondary));
+      border-radius: 50%;
+      opacity: 0.18;
+      pointer-events: none;
+    }
+
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 12px;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+    }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.35rem; }
+
+    .brand-badge {
+      display: block;
+      text-align: center;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--primary);
+      background: var(--accent-soft);
+      padding: 6px 14px;
+      border-radius: 100px;
+      width: fit-content;
+      margin: 0 auto 16px;
+      font-weight: 700;
+      border: 1px solid var(--accent);
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 22px;
+      font-size: 0.92rem;
+      max-width: 92%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .page { display: none; animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+    .page.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== SEARCH BOX IN STILE BOOKING ===== */
+    .search-box {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: var(--radius-sm);
+      padding: 20px 18px;
+      margin-bottom: 22px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .search-box .search-title {
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search-box .search-title .icon {
+      font-size: 1.2rem;
+    }
+
+    .search-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .search-field {
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .search-field label {
+      display: block;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .search-field input[type="date"] {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-size: 0.88rem;
+      color: var(--text);
+      background: transparent;
+      font-family: inherit;
+      min-height: 28px;
+    }
+
+    .search-field input[type="date"]::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      filter: invert(0.3);
+    }
+
+    /* ===== INFO STRUTTURA ===== */
+    .info-strip {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .info-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border-radius: 100px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .info-pill.good {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #b8e6ce;
+    }
+
+    .info-pill.warn {
+      background: #fff4e0;
+      color: #b06d00;
+      border: 1px solid #ffd699;
+    }
+
+    .info-pill.neutral {
+      background: #eef3fa;
+      color: var(--primary);
+      border: 1px solid #cfe0f5;
+    }
+
+    /* ===== CARD STANZA ===== */
+    .room-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .room-card {
+      position: relative;
+      background: #fff;
+      border: 2px solid #e3ecf7;
+      border-radius: var(--radius-sm);
+      padding: 18px 16px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .room-card:hover {
+      border-color: var(--secondary);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .room-card.selected {
+      border-color: var(--accent);
+      background: #fffdf3;
+      box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.25);
+    }
+
+    .room-icon {
+      font-size: 1.8rem;
+      line-height: 1;
+      flex-shrink: 0;
+      width: 48px; height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #eef3fa, #fff8dc);
+      border-radius: 12px;
+    }
+
+    .room-info { flex: 1; min-width: 0; }
+
+    .room-info h3 {
+      color: var(--primary);
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .room-info .room-desc {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+
+    .room-info .room-price {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+    }
+
+    .room-badge {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: var(--accent);
+      color: var(--primary-dark);
+      font-size: 0.62rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 100px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ===== FORM ===== */
+    .form-group { margin-bottom: 16px; }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 7px;
+      font-size: 0.88rem;
+      color: var(--primary-dark);
+    }
+
+    input[type="text"], select, textarea {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1.5px solid #dce7f5;
+      border-radius: 12px;
+      font-size: 16px;
+      outline: none;
+      background: #fafcff;
+      transition: all 0.2s ease;
+      color: var(--text);
+      min-height: 48px;
+      font-family: inherit;
+    }
+
+    input[type="text"]:focus, select:focus, textarea:focus {
+      border-color: var(--secondary);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(74, 144, 217, 0.15);
+    }
+
+    input[type="text"]::placeholder, textarea::placeholder {
+      color: #a8b8c8;
+      font-style: italic;
+    }
+
+    .micro-copy {
+      font-size: 0.74rem;
+      color: #a8b8c8;
+      margin-top: 5px;
+      font-style: italic;
+    }
+
+    /* ===== EXTRA ===== */
+    .extras-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .extra-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: #fafcff;
+      border: 1.5px solid #e3ecf7;
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.82rem;
+    }
+
+    .extra-item:hover {
+      border-color: var(--secondary);
+      background: #fff;
+    }
+
+    .extra-item input[type="checkbox"] {
+      margin-top: 2px;
+      accent-color: var(--primary);
+      width: 18px; height: 18px;
+      flex-shrink: 0;
+    }
+
+    .extra-item .extra-label {
+      font-weight: 600;
+      color: var(--primary-dark);
+      display: block;
+      line-height: 1.3;
+    }
+
+    .extra-item .extra-cost {
+      font-size: 0.72rem;
+      color: var(--accent-dark);
+      font-weight: 700;
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* ===== RIEPILOGO COSTI ===== */
+    .price-box {
+      background: var(--success-bg);
+      border: 1.5px dashed var(--success);
+      padding: 16px 18px;
+      border-radius: var(--radius-sm);
+      margin: 22px 0;
+    }
+
+    .price-box .price-title {
+      text-align: center;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--success);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 4px 0;
+      gap: 10px;
+    }
+
+    .price-row .amount {
+      font-weight: bold;
+      color: var(--success);
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .price-row.total {
+      border-top: 1px solid #b8e6ce;
+      margin-top: 8px;
+      padding-top: 10px;
+      font-size: 1rem;
+      color: var(--success);
+      font-weight: bold;
+    }
+
+    .price-row.total .amount { font-size: 1.15rem; }
+
+    .price-box .micro-copy {
+      text-align: center;
+      margin-top: 10px;
+      color: #6ba888;
+    }
+
+    /* ===== CHECKBOX TERMS ===== */
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 15px;
+      background: #fafcff;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px dashed #cfe0f5;
+    }
+
+    .checkbox-group input {
+      margin-top: 3px;
+      accent-color: var(--primary);
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+    }
+
+    .checkbox-group label {
+      font-weight: normal;
+      font-size: 0.83rem;
+      color: var(--text);
+      margin-bottom: 0;
+    }
+
+    /* ===== BOTTONI ===== */
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 8px 20px rgba(26, 75, 140, 0.3);
+      letter-spacing: 0.01em;
+      min-height: 54px;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(26, 75, 140, 0.4);
+    }
+    .submit-btn:active { transform: translateY(0) scale(0.99); }
+
+    .submit-btn.accent {
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: var(--primary-dark);
+      box-shadow: 0 8px 20px rgba(245, 197, 24, 0.4);
+    }
+
+    .back-btn {
+      background: transparent;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      text-decoration: underline;
+      padding: 8px 0;
+      transition: opacity 0.2s;
+      min-height: 40px;
+    }
+
+    .back-btn:hover { opacity: 0.7; }
+
+    /* ===== BIGLIETTO / VOUCHER ===== */
+    .ticket-real {
+      margin-top: 15px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      background: #fff;
+      border: 1px solid #dce7f5;
+      position: relative;
+    }
+
+    .brand-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: #f5f8fc;
+      border-bottom: 1px solid #dce7f5;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      border-radius: 100px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      font-size: 0.78rem;
+      color: #fff;
+      text-transform: uppercase;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    }
+
+    .brand-logo .stars {
+      font-size: 0.65rem;
+      color: var(--accent);
+      border-left: 1px solid rgba(255,255,255,0.4);
+      padding-left: 8px;
+      margin-left: 2px;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-strip .brand-tagline {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.2;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .ticket-top {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 18px 20px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .ticket-top-left h3 {
+      color: #fff;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 2px;
+    }
+
+    .ticket-top-left p {
+      font-size: 0.68rem;
+      opacity: 0.85;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .ticket-top-right { text-align: right; }
+
+    .ticket-top-right .label {
+      font-size: 0.6rem;
+      opacity: 0.75;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: block;
+    }
+
+    .ticket-top-right .value {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .ticket-main { padding: 20px; }
+
+    .ticket-route {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed #cfe0f5;
+    }
+
+    .ticket-route .point { text-align: center; flex: 1; min-width: 0; }
+
+    .ticket-route .point .code {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      line-height: 1;
+      word-break: break-word;
+    }
+
+    .ticket-route .point .city {
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    .ticket-route .plane {
+      font-size: 1.3rem;
+      color: var(--accent-dark);
+      flex-shrink: 0;
+    }
+
+    .ticket-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 16px;
+      margin-bottom: 18px;
+    }
+
+    .ticket-field .field-label {
+      font-size: 0.62rem;
+      color: #a8b8c8;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 3px;
+      display: block;
+    }
+
+    .ticket-field .field-value {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    .ticket-perforation {
+      position: relative;
+      height: 20px;
+      margin: 0 -20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ticket-perforation::before,
+    .ticket-perforation::after {
+      content: "";
+      position: absolute;
+      width: 20px; height: 20px;
+      background: var(--card-bg);
+      border-radius: 50%;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    .ticket-perforation::before { left: -10px; }
+    .ticket-perforation::after { right: -10px; }
+
+    .ticket-perforation .line {
+      width: 100%;
+      border-top: 2px dashed #cfe0f5;
+      margin: 0 20px;
+    }
+
+    .ticket-stub {
+      background: #f5f8fc;
+      padding: 18px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .ticket-stub-info { flex: 1; min-width: 0; }
+
+    .ticket-stub-info .row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      margin-bottom: 6px;
+      gap: 8px;
+    }
+
+    .ticket-stub-info .row .lbl { color: var(--muted); }
+    .ticket-stub-info .row .val {
+      font-weight: 700;
+      color: var(--text);
+      text-align: right;
+    }
+
+    .qr-fake {
+      width: 80px; height: 80px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      background:
+        linear-gradient(45deg, var(--primary) 25%, transparent 25%) 0 0/10px 10px,
+        linear-gradient(-45deg, var(--primary) 25%, transparent 25%) 0 0/10px 10px,
+        linear-gradient(45deg, transparent 75%, var(--accent) 75%) 0 0/10px 10px,
+        linear-gradient(-45deg, transparent 75%, var(--accent) 75%) 0 0/10px 10px,
+        #fff;
+      border: 3px solid var(--primary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .qr-fake::before {
+      content: "";
+      position: absolute;
+      top: 6px; left: 6px;
+      width: 14px; height: 14px;
+      background: var(--primary);
+      border-radius: 2px;
+    }
+
+    .qr-fake::after {
+      content: "";
+      position: absolute;
+      bottom: 6px; right: 6px;
+      width: 14px; height: 14px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .barcode-real {
+      height: 44px;
+      width: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--text) 0 2px, transparent 2px 4px,
+        var(--text) 4px 7px, transparent 7px 10px,
+        var(--text) 10px 11px, transparent 11px 15px
+      );
+      opacity: 0.8;
+      border-radius: 3px;
+      margin-top: 8px;
+    }
+
+    .barcode-label {
+      text-align: center;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .stamp {
+      position: absolute;
+      top: 12px; right: 12px;
+      border: 2px solid var(--success);
+      color: var(--success);
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      transform: rotate(12deg);
+      letter-spacing: 0.1em;
+      background: rgba(255,255,255,0.9);
+      z-index: 2;
+    }
+
+    .fun-message {
+      margin-top: 18px;
+      padding: 16px 18px;
+      background: linear-gradient(135deg, #fff8dc, #ffeaa7);
+      border: 1.5px dashed var(--accent-dark);
+      border-radius: var(--radius-sm);
+      text-align: center;
+      font-size: 0.92rem;
+      color: #7a5c00;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .fun-message .emoji {
+      display: block;
+      font-size: 1.4rem;
+      margin-bottom: 6px;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 18px;
+      font-size: 0.78rem;
+      color: #a8b8c8;
+      font-style: italic;
+    }
+
+    .counter {
+      display: block;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 14px;
+      letter-spacing: 0.03em;
+    }
+
+    .counter strong { color: var(--primary); }
+
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .container { padding: 22px 16px 18px; border-radius: 16px; }
+      h1 { font-size: 1.25rem; }
+      h2 { font-size: 1.1rem; }
+      p.subtitle { font-size: 0.86rem; margin-bottom: 16px; }
+      .search-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .search-field { padding: 8px 10px; }
+      .search-field input[type="date"] { font-size: 0.82rem; }
+      .room-card { padding: 14px 12px; gap: 10px; }
+      .room-icon { width: 42px; height: 42px; font-size: 1.5rem; }
+      .room-info h3 { font-size: 0.92rem; }
+      .room-info .room-desc { font-size: 0.75rem; }
+      .extras-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+      .extra-item { padding: 10px; font-size: 0.78rem; }
+      .ticket-main { padding: 16px; }
+      .ticket-grid { grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+      .ticket-route .point .code { font-size: 1.05rem; }
+      .ticket-route .plane { font-size: 1.1rem; }
+      .ticket-stub { padding: 14px 16px; gap: 12px; }
+      .ticket-stub-info .row { font-size: 0.72rem; }
+      .qr-fake { width: 66px; height: 66px; }
+      .barcode-real { height: 36px; }
+      .barcode-label { font-size: 0.55rem; letter-spacing: 0.2em; }
+      .ticket-top { padding: 14px 16px 12px; }
+      .ticket-top-left h3 { font-size: 0.92rem; }
+      .ticket-top-right .value { font-size: 0.78rem; }
+      .stamp { font-size: 0.55rem; padding: 2px 6px; }
+      .fun-message { font-size: 0.85rem; padding: 14px; }
+      .brand-strip { padding: 8px 12px; gap: 8px; }
+      .brand-logo { font-size: 0.7rem; padding: 5px 10px; }
+      .brand-strip .brand-tagline { font-size: 0.64rem; }
+      .price-box { padding: 14px; }
+      .price-row { font-size: 0.8rem; }
+      .price-row.total { font-size: 0.95rem; }
+      .price-row.total .amount { font-size: 1.05rem; }
+    }
+
+    @media (max-width: 360px) {
+      h1 { font-size: 1.1rem; }
+      .search-grid { grid-template-columns: 1fr; }
+      .extras-grid { grid-template-columns: 1fr; }
+      .ticket-grid { grid-template-columns: 1fr; }
+      .ticket-grid .ticket-field[style*="span 2"] { grid-column: span 1 !important; }
+      .qr-fake { width: 58px; height: 58px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- SCHERMATA 1: HOME / PRENOTAZIONE -->
+    <div id="page-home" class="page active">
+      <span class="brand-badge">🏠 B&B da Me · Camera in Affitto</span>
+      <h1>Benvenuta nel tuo alloggio preferito 🛏️</h1>
+      <p class="subtitle">Un letto, un tetto e zero recensioni negative. Scegli le date e prenota il tuo soggiorno.</p>
+
+      <!-- Info struttura in stile Booking -->
+      <div class="info-strip">
+        <span class="info-pill good">✓ Vicino al centro</span>
+        <span class="info-pill warn">⚠ Scomodo con i mezzi</span>
+        <span class="info-pill neutral">⭐ 10/10 (recensione unica: io)</span>
+      </div>
+
+      <!-- Search box date -->
+      <div class="search-box">
+        <div class="search-title">
+          <span class="icon">📅</span>
+          <span>Quando arrivi e quando vai via?</span>
+        </div>
+        <div class="search-grid">
+          <div class="search-field">
+            <label for="h-checkin">Check-in</label>
+            <input type="date" id="h-checkin" required>
+          </div>
+          <div class="search-field">
+            <label for="h-checkout">Check-out</label>
+            <input type="date" id="h-checkout" required>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="submit-btn accent" onclick="openBooking()">
+        PRENOTA ORA 🛎️
+      </button>
+
+      <div class="info-strip" style="margin-top: 18px; justify-content: center;">
+        <span class="info-pill neutral">🚭 No fumatori</span>
+        <span class="info-pill neutral">🐾 Animali benvenuti</span>
+        <span class="info-pill neutral">📶 Wi-Fi incluso</span>
+      </div>
+
+      <span class="counter">Prenotazioni confermate oggi: <strong>1</strong> (indovina un po')</span>
+    </div>
+
+    <!-- SCHERMATA 2: SCELTA STANZA + EXTRA -->
+    <div id="page-booking" class="page">
+      <button type="button" class="back-btn" onclick="goHome()">← Torna alla home</button>
+      <h2>🛏️ Scegli la tua stanza</h2>
+      <p class="subtitle">Tre opzioni di lusso, ognuna con il suo fascino. I prezzi sono in valuta affettiva.</p>
+
+      <div class="room-grid" id="room-grid">
+        <div class="room-card" data-room="Camera degli Ospiti" data-price="3" onclick="selectRoom(this)">
+          <span class="room-badge">Consigliata</span>
+          <div class="room-icon">🛏️</div>
+          <div class="room-info">
+            <h3>Camera degli Ospiti</h3>
+            <div class="room-desc">Letto matrimoniale, armadio, vista sul cortile. La scelta classica e affidabile.</div>
+            <div class="room-price">3 abbracci + 1 colazione</div>
+          </div>
+        </div>
+
+        <div class="room-card" data-room="Divano Letto" data-price="1" onclick="selectRoom(this)">
+          <div class="room-icon">🛋️</div>
+          <div class="room-info">
+            <h3>Divano Letto</h3>
+            <div class="room-desc">Per chi ama l'avventura e non ha pretese. Coperta inclusa (forse).</div>
+            <div class="room-price">1 abbraccio + 1 film</div>
+          </div>
+        </div>
+
+        <div class="room-card" data-room="Camera VIP" data-price="5" onclick="selectRoom(this)">
+          <div class="room-icon">👑</div>
+          <div class="room-info">
+            <h3>Camera VIP</h3>
+            <div class="room-desc">La mia camera. Letto king size, cuscini morbidi, trattamento da regina.</div>
+            <div class="room-price">5 abbracci + 1 cena + 3 coccole</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="b-nome">Nome dell'Ospite</label>
+        <input type="text" id="b-nome" placeholder="Es. La mia amica del cuore" required>
+      </div>
+
+      <div class="form-group">
+        <label for="b-note">Richieste Speciali</label>
+        <input type="text" id="b-note" placeholder="Es. Cuscino in più, silenzio totale, caffè alle 7">
+        <div class="micro-copy">*Le richieste impossibili saranno accolte con un sorriso.</div>
+      </div>
+
+      <h3 style="color: var(--primary); font-size: 1rem; margin: 20px 0 12px;">✨ Extra simpatici</h3>
+
+      <div class="extras-grid">
+        <label class="extra-item">
+          <input type="checkbox" class="extra-check" data-label="Coperte pesanti" data-cost="1 abbraccio">
+          <span>
+            <span class="extra-label">Coperte pesanti</span>
+            <span class="extra-cost">+1 abbraccio</span>
+          </span>
+        </label>
+
+        <label class="extra-item">
+          <input type="checkbox" class="extra-check" data-label="Colazione a letto" data-cost="1 caffè + 1 cornetto">
+          <span>
+            <span class="extra-label">Colazione a letto</span>
+            <span class="extra-cost">+1 caffè + 1 cornetto</span>
+          </span>
+        </label>
+
+        <label class="extra-item">
+          <input type="checkbox" class="extra-check" data-label="Cena insieme" data-cost="1 cena">
+          <span>
+            <span class="extra-label">Cena insieme</span>
+            <span class="extra-cost">+1 cena</span>
+          </span>
+        </label>
+
+        <label class="extra-item">
+          <input type="checkbox" class="extra-check" data-label="Netflix & Chill" data-cost="1 film + 1 coccola">
+          <span>
+            <span class="extra-label">Netflix & Chill</span>
+            <span class="extra-cost">+1 film + 1 coccola</span>
+          </span>
+        </label>
+
+        <label class="extra-item">
+          <input type="checkbox" class="extra-check" data-label="Doccia calda illimitata" data-cost="1 abbraccio">
+          <span>
+            <span class="extra-label">Doccia calda illimitata</span>
+            <span class="extra-cost">+1 abbraccio</span>
+          </span>
+        </label>
+
+        <label class="extra-item">
+          <input type="checkbox" class="extra-check" data-label="Sveglia con sorriso" data-cost="1 caffè">
+          <span>
+            <span class="extra-label">Sveglia con sorriso</span>
+            <span class="extra-cost">+1 caffè</span>
+          </span>
+        </label>
+
+        <label class="extra-item">
+          <input type="checkbox" class="extra-check" data-label="Chiacchiere fino a tardi" data-cost="1 compagnia">
+          <span>
+            <span class="extra-label">Chiacchiere fino a tardi</span>
+            <span class="extra-cost">+1 compagnia</span>
+          </span>
+        </label>
+
+        <label class="extra-item">
+          <input type="checkbox" class="extra-check" data-label="Pacco coccole completo" data-cost="3 coccole">
+          <span>
+            <span class="extra-label">Pacco coccole completo</span>
+            <span class="extra-cost">+3 coccole</span>
+          </span>
+        </label>
+      </div>
+
+      <div class="price-box" id="price-box">
+        <div class="price-title">Riepilogo Soggiorno</div>
+        <div class="price-row"><span id="p-room-label">Stanza selezionata</span><span class="amount" id="p-room">—</span></div>
+        <div class="price-row"><span>Notti prenotate</span><span class="amount" id="p-nights">—</span></div>
+        <div class="price-row"><span>Extra selezionati</span><span class="amount" id="p-extras">—</span></div>
+        <div class="price-row total"><span>Totale in valuta affettiva</span><span class="amount" id="p-total">—</span></div>
+        <div class="micro-copy">*Pagamento accettato solo in abbracci, cibo e compagnia.</div>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="b-terms" required>
+        <label for="b-terms">Accetto la clausola speciale: <em>"Il check-out è flessibile, ma il caffè del mattino no!"</em> ☕</label>
+      </div>
+
+      <br>
+      <button type="button" class="submit-btn" onclick="generateVoucher()">
+        CONFERMA PRENOTAZIONE 🏠
+      </button>
+    </div>
+
+    <!-- SCHERMATA 3: VOUCHER FINALE -->
+    <div id="page-voucher" class="page">
+      <h2>🎉 Prenotazione Confermata!</h2>
+      <p class="subtitle">Il tuo soggiorno è stato registrato nei nostri sistemi affettivi.</p>
+
+      <div class="ticket-real" id="voucher-preview">
+        <span class="stamp">CONFERMATO</span>
+
+        <div class="brand-strip">
+          <div class="brand-logo">
+            <span>B&B da Me</span>
+            <span class="stars">★★★★★</span>
+          </div>
+          <span class="brand-tagline">Vicino al centro, scomodo con i mezzi. Ma ne vale la pena.</span>
+        </div>
+
+        <div class="ticket-top">
+          <div class="ticket-top-left">
+            <h3>VOUCHER SOGGIORNO</h3>
+            <p id="t-subtitle">CAMERA DEGLI OSPITI · 2 NOTTI</p>
+          </div>
+          <div class="ticket-top-right">
+            <span class="label">Prenotazione</span>
+            <span class="value" id="t-code">#B&B-001</span>
+          </div>
+        </div>
+
+        <div class="ticket-main">
+          <div class="ticket-route">
+            <div class="point">
+              <div class="code" id="t-checkin">--/--</div>
+              <div class="city">Check-in</div>
+            </div>
+            <div class="plane">🌙</div>
+            <div class="point">
+              <div class="code" id="t-checkout">--/--</div>
+              <div class="city">Check-out</div>
+            </div>
+          </div>
+
+          <div class="ticket-grid">
+            <div class="ticket-field">
+              <span class="field-label">Ospite</span>
+              <span class="field-value" id="t-nome">-</span>
+            </div>
+            <div class="ticket-field">
+              <span class="field-label">Stanza</span>
+              <span class="field-value" id="t-room">-</span>
+            </div>
+            <div class="ticket-field">
+              <span class="field-label">Notti</span>
+              <span class="field-value" id="t-nights">-</span>
+            </div>
+            <div class="ticket-field">
+              <span class="field-label">Richieste</span>
+              <span class="field-value" id="t-note">-</span>
+            </div>
+            <div class="ticket-field" style="grid-column: span 2;">
+              <span class="field-label">Extra</span>
+              <span class="field-value" id="t-extras">-</span>
+            </div>
+          </div>
+
+          <div class="ticket-perforation">
+            <div class="line"></div>
+          </div>
+        </div>
+
+        <div class="ticket-stub">
+          <div class="ticket-stub-info">
+            <div class="row">
+              <span class="lbl">Totale:</span>
+              <span class="val" id="t-total">-</span>
+            </div>
+            <div class="row">
+              <span class="lbl">Stato Pagamento:</span>
+              <span class="val" style="color: var(--success);">CONFERMATO (Offerto io!)</span>
+            </div>
+            <div class="barcode-real"></div>
+            <div class="barcode-label" id="t-barcode">BNB-001-2026-AMICIZIA</div>
+          </div>
+          <div class="qr-fake"></div>
+        </div>
+      </div>
+
+      <div class="fun-message">
+        <span class="emoji">😄🏠🛏️</span>
+        Ecco, ora ogni volta che vuoi il brivido di prenotare qualcosa puoi farlo senza spendere soldi ahahahahah
+      </div>
+
+      <p class="footer-note">📸 Fai uno screenshot e inviamelo per riscattare subito il soggiorno!</p>
+
+      <br>
+      <button type="button" class="submit-btn" onclick="goHome()" style="background: linear-gradient(135deg, #5a6b7c, #1c2b3a); box-shadow: 0 8px 20px rgba(28,43,58,0.25);">Ricomincia / Cambia Prenotazione</button>
+    </div>
+
+  </div>
+
+  <script>
+    // ===== STATO =====
+    let selectedRoom = null;
+
+    // ===== NAVIGAZIONE =====
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function goHome() { showPage('page-home'); }
+
+    function openBooking() {
+      const checkin = document.getElementById('h-checkin').value;
+      const checkout = document.getElementById('h-checkout').value;
+      if (!checkin || !checkout) {
+        alert('Inserisci le date di check-in e check-out per favore 😊');
+        return;
+      }
+      if (new Date(checkout) <= new Date(checkin)) {
+        alert('Il check-out deve essere dopo il check-in!');
+        return;
+      }
+      showPage('page-booking');
+      updatePriceBox();
+    }
+
+    // ===== SELEZIONE STANZA =====
+    function selectRoom(card) {
+      document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedRoom = {
+        name: card.dataset.room,
+        price: parseInt(card.dataset.price),
+        priceLabel: card.querySelector('.room-price').innerText
+      };
+      updatePriceBox();
+    }
+
+    // ===== CALCOLO NOTTI =====
+    function calcolaNotti() {
+      const checkin = document.getElementById('h-checkin').value;
+      const checkout = document.getElementById('h-checkout').value;
+      if (!checkin || !checkout) return 0;
+      const d1 = new Date(checkin);
+      const d2 = new Date(checkout);
+      const diff = Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+      return diff > 0 ? diff : 0;
+    }
+
+    // ===== AGGIORNA RIEPILOGO =====
+    function updatePriceBox() {
+      const notti = calcolaNotti();
+
+      document.getElementById('p-nights').textContent = notti > 0
+        ? notti + (notti === 1 ? ' notte' : ' notti')
+        : '—';
+
+      if (selectedRoom) {
+        document.getElementById('p-room-label').textContent = 'Stanza: ' + selectedRoom.name;
+        document.getElementById('p-room').textContent = selectedRoom.priceLabel + (notti > 1 ? ' × ' + notti : '');
+      } else {
+        document.getElementById('p-room-label').textContent = 'Stanza selezionata';
+        document.getElementById('p-room').textContent = '—';
+      }
+
+      // Extra selezionati
+      const extras = document.querySelectorAll('.extra-check:checked');
+      const extrasList = [];
+      extras.forEach(e => extrasList.push(e.dataset.label + ' (' + e.dataset.cost + ')'));
+      document.getElementById('p-extras').textContent = extrasList.length > 0
+        ? extrasList.length + ' selezionati'
+        : '—';
+
+      // Totale (simbolico)
+      let totale = '';
+      if (selectedRoom) {
+        const moltiplicatore = notti > 1 ? notti : 1;
+        totale = selectedRoom.priceLabel;
+        if (notti > 1) totale += ' × ' + notti;
+        if (extrasList.length > 0) totale += ' + ' + extrasList.length + ' extra';
+      } else {
+        totale = '—';
+      }
+      document.getElementById('p-total').textContent = totale;
+    }
+
+    // Ascolta cambi extra
+    document.addEventListener('change', function(e) {
+      if (e.target.classList.contains('extra-check')) {
+        updatePriceBox();
+      }
+    });
+
+    // ===== GENERAZIONE VOUCHER =====
+    function generateVoucher() {
+      if (!selectedRoom) {
+        alert('Scegli prima una stanza! 🛏️');
+        return;
+      }
+      const nome = document.getElementById('b-nome').value.trim();
+      if (!nome) {
+        alert('Inserisci il nome dell\'ospite 😊');
+        return;
+      }
+      const checkin = document.getElementById('h-checkin').value;
+      const checkout = document.getElementById('h-checkout').value;
+      const notti = calcolaNotti();
+      const note = document.getElementById('b-note').value.trim() || 'Nessuna richiesta speciale';
+
+      const extras = [];
+      document.querySelectorAll('.extra-check:checked').forEach(e => {
+        extras.push(e.dataset.label);
+      });
+      const extrasText = extras.length > 0 ? extras.join(' · ') : 'Nessun extra';
+
+      // Formatta date
+      const fmtDate = (iso) => {
+        if (!iso) return '--/--';
+        const d = new Date(iso);
+        return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+      };
+
+      // Aggiorna anteprima
+      document.getElementById('t-subtitle').textContent = selectedRoom.name.toUpperCase() + ' · ' + notti + ' NOTTI';
+      document.getElementById('t-checkin').textContent = fmtDate(checkin);
+      document.getElementById('t-checkout').textContent = fmtDate(checkout);
+      document.getElementById('t-nome').textContent = nome;
+      document.getElementById('t-room').textContent = selectedRoom.name;
+      document.getElementById('t-nights').textContent = notti + (notti === 1 ? ' notte' : ' notti');
+      document.getElementById('t-note').textContent = note;
+      document.getElementById('t-extras').textContent = extrasText;
+      document.getElementById('t-total').textContent = selectedRoom.priceLabel + (notti > 1 ? ' × ' + notti : '') + (extras.length > 0 ? ' + ' + extras.length + ' extra' : '');
+
+      // Genera biglietto in nuova pagina
+      apriVoucher({
+        nome, checkin, checkout, notti, note, extrasText,
+        room: selectedRoom,
+        dateFmt: { checkin: fmtDate(checkin), checkout: fmtDate(checkout) }
+      });
+
+      showPage('page-voucher');
+    }
+
+    // ===== APRI NUOVA PAGINA CON VOUCHER =====
+    function apriVoucher(data) {
+      const win = window.open('', '_blank');
+      if (!win) {
+        alert('Popup bloccato. Consenti i popup per aprire il voucher in una nuova scheda.');
+        return;
+      }
+
+      const html = `
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Voucher Soggiorno - B&B da Me</title>
+  <style>
+    :root {
+      --primary: #1a4b8c;
+      --primary-dark: #0f3260;
+      --secondary: #4a90d9;
+      --accent: #f5c518;
+      --accent-dark: #d4a800;
+      --success: #1a7a4c;
+      --text: #1c2b3a;
+      --muted: #5a6b7c;
+      --bg: #f0f4fa;
+      --card-bg: #ffffff;
+      --shadow-lg: 0 20px 50px rgba(26, 75, 140, 0.18);
+    }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; -webkit-text-size-adjust: 100%; }
+    body {
+      background: var(--bg);
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; min-height: 100dvh;
+      padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      line-height: 1.5;
+    }
+    .wrapper { max-width: 520px; width: 100%; }
+    .ticket-real {
+      border-radius: 18px; overflow: hidden;
+      box-shadow: var(--shadow-lg);
+      background: #fff; border: 1px solid #dce7f5; position: relative;
+    }
+    .stamp {
+      position: absolute; top: 12px; right: 12px;
+      border: 2px solid var(--success); color: var(--success);
+      font-size: 0.6rem; font-weight: 800; padding: 3px 8px;
+      border-radius: 6px; transform: rotate(12deg);
+      letter-spacing: 0.1em; background: rgba(255,255,255,0.9); z-index: 2;
+    }
+    .brand-strip {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px; background: #f5f8fc;
+      border-bottom: 1px solid #dce7f5;
+    }
+    .brand-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 6px 12px; border-radius: 100px;
+      font-weight: 800; letter-spacing: 0.05em;
+      font-size: 0.78rem; color: #fff;
+      text-transform: uppercase; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    }
+    .brand-logo .stars {
+      font-size: 0.65rem; color: var(--accent);
+      border-left: 1px solid rgba(255,255,255,0.4);
+      padding-left: 8px; margin-left: 2px; letter-spacing: 0.05em;
+    }
+    .brand-strip .brand-tagline {
+      font-size: 0.7rem; color: var(--muted);
+      font-style: italic; line-height: 1.2;
+      flex: 1; min-width: 0; overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap;
+    }
+    .ticket-top {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff; padding: 18px 20px 16px;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+    }
+    .ticket-top-left h3 { color: #fff; font-size: 1rem; letter-spacing: 0.08em; margin-bottom: 2px; }
+    .ticket-top-left p { font-size: 0.68rem; opacity: 0.85; letter-spacing: 0.12em; text-transform: uppercase; }
+    .ticket-top-right { text-align: right; }
+    .ticket-top-right .label { font-size: 0.6rem; opacity: 0.75; letter-spacing: 0.1em; text-transform: uppercase; display: block; }
+    .ticket-top-right .value { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; }
+    .ticket-main { padding: 20px; }
+    .ticket-route {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin-bottom: 18px; padding-bottom: 16px; border-bottom: 1px dashed #cfe0f5;
+    }
+    .ticket-route .point { text-align: center; flex: 1; min-width: 0; }
+    .ticket-route .point .code { font-size: 1.3rem; font-weight: 800; color: var(--primary); letter-spacing: 0.05em; line-height: 1; word-break: break-word; }
+    .ticket-route .point .city { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+    .ticket-route .plane { font-size: 1.3rem; color: var(--accent-dark); flex-shrink: 0; }
+    .ticket-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin-bottom: 18px; }
+    .ticket-field .field-label { font-size: 0.62rem; color: #a8b8c8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; display: block; }
+    .ticket-field .field-value { font-size: 0.88rem; font-weight: 700; color: var(--text); word-break: break-word; }
+    .ticket-perforation { position: relative; height: 20px; margin: 0 -20px; display: flex; align-items: center; justify-content: center; }
+    .ticket-perforation::before, .ticket-perforation::after {
+      content: ""; position: absolute; width: 20px; height: 20px; background: var(--card-bg); border-radius: 50%; top: 50%; transform: translateY(-50%);
+    }
+    .ticket-perforation::before { left: -10px; }
+    .ticket-perforation::after { right: -10px; }
+    .ticket-perforation .line { width: 100%; border-top: 2px dashed #cfe0f5; margin: 0 20px; }
+    .ticket-stub { background: #f5f8fc; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .ticket-stub-info { flex: 1; min-width: 0; }
+    .ticket-stub-info .row { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 6px; gap: 8px; }
+    .ticket-stub-info .row .lbl { color: var(--muted); }
+    .ticket-stub-info .row .val { font-weight: 700; color: var(--text); text-align: right; }
+    .qr-fake {
+      width: 80px; height: 80px; flex-shrink: 0; border-radius: 8px;
+      background:
+        linear-gradient(45deg, var(--primary) 25%, transparent 25%) 0 0/10px 10px,
+        linear-gradient(-45deg, var(--primary) 25%, transparent 25%) 0 0/10px 10px,
+        linear-gradient(45deg, transparent 75%, var(--accent) 75%) 0 0/10px 10px,
+        linear-gradient(-45deg, transparent 75%, var(--accent) 75%) 0 0/10px 10px,
+        #fff;
+      border: 3px solid var(--primary); position: relative; overflow: hidden;
+    }
+    .qr-fake::before { content: ""; position: absolute; top: 6px; left: 6px; width: 14px; height: 14px; background: var(--primary); border-radius: 2px; }
+    .qr-fake::after { content: ""; position: absolute; bottom: 6px; right: 6px; width: 14px; height: 14px; background: var(--accent); border-radius: 2px; }
+    .barcode-real {
+      height: 44px; width: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--text) 0 2px, transparent 2px 4px,
+        var(--text) 4px 7px, transparent 7px 10px,
+        var(--text) 10px 11px, transparent 11px 15px
+      );
+      opacity: 0.8; border-radius: 3px; margin-top: 8px;
+    }
+    .barcode-label { text-align: center; font-size: 0.6rem; letter-spacing: 0.3em; color: var(--muted); margin-top: 4px; }
+    .fun-message {
+      margin-top: 18px; padding: 16px 18px;
+      background: linear-gradient(135deg, #fff8dc, #ffeaa7);
+      border: 1.5px dashed var(--accent-dark); border-radius: 14px;
+      text-align: center; font-size: 0.92rem; color: #7a5c00;
+      line-height: 1.5; font-weight: 600;
+    }
+    .fun-message .emoji { display: block; font-size: 1.4rem; margin-bottom: 6px; }
+    .footer-note { text-align: center; margin-top: 20px; font-size: 0.78rem; color: #a8b8c8; font-style: italic; }
+
+    @media (max-width: 480px) {
+      body { padding: 10px; }
+      .ticket-main { padding: 16px; }
+      .ticket-grid { grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+      .ticket-route .point .code { font-size: 1.05rem; }
+      .ticket-route .plane { font-size: 1.1rem; }
+      .ticket-stub { padding: 14px 16px; gap: 12px; }
+      .ticket-stub-info .row { font-size: 0.72rem; }
+      .qr-fake { width: 66px; height: 66px; }
+      .barcode-real { height: 36px; }
+      .barcode-label { font-size: 0.55rem; letter-spacing: 0.2em; }
+      .ticket-top { padding: 14px 16px 12px; }
+      .ticket-top-left h3 { font-size: 0.92rem; }
+      .ticket-top-right .value { font-size: 0.78rem; }
+      .stamp { font-size: 0.55rem; padding: 2px 6px; }
+      .fun-message { font-size: 0.85rem; padding: 14px; }
+      .brand-strip { padding: 8px 12px; gap: 8px; }
+      .brand-logo { font-size: 0.7rem; padding: 5px 10px; }
+      .brand-strip .brand-tagline { font-size: 0.64rem; }
+    }
+    @media (max-width: 360px) {
+      .ticket-grid { grid-template-columns: 1fr; }
+      .ticket-grid .ticket-field[style*="span 2"] { grid-column: span 1 !important; }
+      .qr-fake { width: 58px; height: 58px; }
+    }
+    @media print {
+      body { background: #fff; }
+      .ticket-real { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="ticket-real">
+      <span class="stamp">CONFERMATO</span>
+      <div class="brand-strip">
+        <div class="brand-logo">
+          <span>B&B da Me</span>
+          <span class="stars">★★★★★</span>
+        </div>
+        <span class="brand-tagline">Vicino al centro, scomodo con i mezzi. Ma ne vale la pena.</span>
+      </div>
+      <div class="ticket-top">
+        <div class="ticket-top-left">
+          <h3>VOUCHER SOGGIORNO</h3>
+          <p>${data.room.name.toUpperCase()} · ${data.notti} NOTTI</p>
+        </div>
+        <div class="ticket-top-right">
+          <span class="label">Prenotazione</span>
+          <span class="value">#B&B-001</span>
+        </div>
+      </div>
+      <div class="ticket-main">
+        <div class="ticket-route">
+          <div class="point">
+            <div class="code">${data.dateFmt.checkin}</div>
+            <div class="city">Check-in</div>
+          </div>
+          <div class="plane">🌙</div>
+          <div class="point">
+            <div class="code">${data.dateFmt.checkout}</div>
+            <div class="city">Check-out</div>
+          </div>
+        </div>
+        <div class="ticket-grid">
+          <div class="ticket-field">
+            <span class="field-label">Ospite</span>
+            <span class="field-value">${data.nome}</span>
+          </div>
+          <div class="ticket-field">
+            <span class="field-label">Stanza</span>
+            <span class="field-value">${data.room.name}</span>
+          </div>
+          <div class="ticket-field">
+            <span class="field-label">Notti</span>
+            <span class="field-value">${data.notti} ${data.notti === 1 ? 'notte' : 'notti'}</span>
+          </div>
+          <div class="ticket-field">
+            <span class="field-label">Richieste</span>
+            <span class="field-value">${data.note}</span>
+          </div>
+          <div class="ticket-field" style="grid-column: span 2;">
+            <span class="field-label">Extra</span>
+            <span class="field-value">${data.extrasText}</span>
+          </div>
+        </div>
+        <div class="ticket-perforation">
+          <div class="line"></div>
+        </div>
+      </div>
+      <div class="ticket-stub">
+        <div class="ticket-stub-info">
+          <div class="row">
+            <span class="lbl">Totale:</span>
+            <span class="val">${data.room.priceLabel}${data.notti > 1 ? ' × ' + data.notti : ''}${data.extrasText !== 'Nessun extra' ? ' + extra' : ''}</span>
+          </div>
+          <div class="row">
+            <span class="lbl">Stato Pagamento:</span>
+            <span class="val" style="color: var(--success);">CONFERMATO (Offerto io!)</span>
+          </div>
+          <div class="barcode-real"></div>
+          <div class="barcode-label">BNB-001-2026-AMICIZIA</div>
+        </div>
+        <div class="qr-fake"></div>
+      </div>
+    </div>
+    <div class="fun-message">
+      <span class="emoji">😄🏠🛏️</span>
+      Ecco, ora ogni volta che vuoi lanciarti a casa mia puoi prenotare dal sito e mandarmi la prenotazione.
+    </div>
+    <p class="footer-note">📸 Fai uno screenshot di questo voucher e invialo per riscattare il soggiorno!</p>
+  </div>
+</body>
+</html>`;
+
+      win.document.write(html);
+      win.document.close();
+    }
+
+    // Imposta date minime a oggi
+    document.addEventListener('DOMContentLoaded', function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('h-checkin').min = today;
+      document.getElementById('h-checkout').min = today;
+    });
+  </script>
+</body>
+</html>
